@@ -10,12 +10,19 @@ class CachingBreedFetcherTest {
     void testCachingAvoidsRedundantCalls() {
         BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
         CachingBreedFetcher cachingFetcher = new CachingBreedFetcher(mock);
+        List<String> fc = null;
+        List<String> fc2 = null;
+        try {
+            List<String> firstCall = cachingFetcher.getSubBreeds("hound");
+            fc =  firstCall;
+            List<String> secondCall = cachingFetcher.getSubBreeds("hound");
+            fc2 =  secondCall;
+        } catch (dogapi.BreedFetcher.BreedNotFoundException e) {
+            fail();
+        }
 
-        List<String> firstCall = cachingFetcher.getSubBreeds("hound");
-        List<String> secondCall = cachingFetcher.getSubBreeds("hound");
-
-        assertEquals(List.of("afghan", "basset"), firstCall);
-        assertEquals(firstCall, secondCall);
+        assertEquals(List.of("afghan", "basset"), fc);
+        assertEquals(fc, fc2);
         assertEquals(1, mock.getCallCount(), "Fetcher should only be called once due to caching");
     }
 
@@ -44,8 +51,17 @@ class CachingBreedFetcherTest {
         BreedFetcherForLocalTesting mock = new BreedFetcherForLocalTesting();
         CachingBreedFetcher cachingFetcher = new CachingBreedFetcher(mock);
 
-        cachingFetcher.getSubBreeds("hound");
-        cachingFetcher.getSubBreeds("hound");
+        try {
+            cachingFetcher.getSubBreeds("hound");
+        } catch (BreedFetcher.BreedNotFoundException e) {
+            fail();
+        }
+
+        try {
+            cachingFetcher.getSubBreeds("hound");
+        } catch (BreedFetcher.BreedNotFoundException e) {
+            fail();
+        }
 
         assertEquals(1, cachingFetcher.getCallsMade(),
                 "Fetcher should only be called once due to caching. " +
