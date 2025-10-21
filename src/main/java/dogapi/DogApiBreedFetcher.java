@@ -34,10 +34,6 @@ public class DogApiBreedFetcher implements BreedFetcher {
 
         try (Response response = client.newCall(request).execute()){
 
-            if (!response.isSuccessful()) {
-                throw new BreedNotFoundException("Breed Not Found");
-            }
-
             JSONObject message = new JSONObject(response.body().string());
 
             String status = message.getString("status");
